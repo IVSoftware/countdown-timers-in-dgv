@@ -1,12 +1,12 @@
 Your question is about countdown timers, specifically:
 >**How can I put different countdown timers in different cells?**
 
-If you think about it, for any given row in your `DataGridView`, that information can be calculated by knowing these three things:
+If you think about it, for any given cell in your `DataGridView` the information that it needs can probably be calculated by knowing these three things:
 - What is the input time?
 - What is the output time?
 - _What time is is **NOW**!?_
 
-In an open ended way, you have asked for "help with this problem" so I will offer you one possible solution because I believe that using the `DataSource` property of `DataGridView` will help you simplify all of your interactions with this powerful UI control.  
+In an open ended way, you have asked for "help with this problem" so I will offer you one possible solution because I believe that using the `DataSource` property of `DataGridView` will help you simplify all of your interactions with this powerful UI control. This will also prove out the assertion that it's "sufficient to have one timer". Its purpose will be to provide continuous updated information for _what time is it now_.  
 
 [![screenshot][1]][1]
 
@@ -79,13 +79,13 @@ Using the `Record` class, assign the `dataGridView.DataSource` to a `BindingList
 ***
 **Updates**
 
-Whenever `Refresh` is called on the `DataGridView` the individual records will refresh their calculations. The method that loads the form does the following:
+Whenever `Refresh` is called on the `DataGridView` the individual records will refresh their calculations. To ensure that this refresh occurs, use the method that loads the main form to perform the following:
 
 - Auto-generate columns for the DGV.
 - Add four items for testing purposes.
 - Attach a timer event to update the DGV and the main form title bar.
 
-One you do this, the view will globally refresh one time per second, giving you a behavior similar to what you have described.
+Once you do this, the view will globally refresh one time per second, giving you a behavior similar to what you have described.
 
     public partial class MainForm : Form
     {
