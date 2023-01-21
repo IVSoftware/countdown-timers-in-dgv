@@ -21,21 +21,30 @@ namespace countdown_timers_in_dgv
             col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             dataGridView.CellPainting += (sender, e) =>
             {
-                if((e.ColumnIndex.Equals(dataGridView.Columns["State"]) && (e.RowIndex != -1)))
+                if(e.ColumnIndex.Equals(dataGridView.Columns["State"].Index) && (e.RowIndex != -1))
                 {
-
+                    switch (Records[e.RowIndex].State)
+                    {
+                        case State.WAITING: e.CellStyle.BackColor = Color.LightBlue; break;
+                        case State.ACTIVE: e.CellStyle.BackColor = Color.LightYellow; break;
+                        case State.EXPIRED: e.CellStyle.BackColor = Color.LightGray; break;
+                        case State.FREE: e.CellStyle.BackColor = Color.LightGreen; break;
+                    }
                 }
             };
             Records.Clear();
             #endregion F O R M A T    C O L U M N S
 
-            // Add a few records
+            #region A D D    T E S T    R E C O R D S
             var now = DateTime.Now;
+            // For testing, round to whole minutes;
+            now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+            
             Records.Add(new Record 
             { 
                 IdCode = "fix0001", 
                 InputTime = now - TimeSpan.FromHours(1),
-                OutputTime = (now - TimeSpan.FromHours(1)) + TimeSpan.FromMinutes(10),
+                OutputTime = now - TimeSpan.FromHours(1) + TimeSpan.FromMinutes(10),
             });
             Records.Add(new Record 
             { 
@@ -43,20 +52,30 @@ namespace countdown_timers_in_dgv
                 InputTime = now,
                 OutputTime = now + TimeSpan.FromMinutes(10),
             });
-            //Records.Add(new Record 
-            //{ 
-            //    IdCode = "fix0001", 
-            //    InputTime = now - TimeSpan.FromDays(1),
-            //    OutputTime = (now - TimeSpan.FromDays(1)) + TimeSpan.FromMinutes(10),
-            //});
+            Records.Add(new Record
+            {
+                IdCode = "fix0003",
+            });
+            Records.Add(new Record
+            {
+                IdCode = "fix0004",
+                InputTime =  now + TimeSpan.FromMinutes(5),
+                OutputTime = now + TimeSpan.FromMinutes(5) + TimeSpan.FromMinutes(10),
+            });
+            #endregion A D D    T E S T    R E C O R D S
 
             // Because we're using System.Windows.Forms.Timer the
             // ticks are issued on the UI thread. Invoke not required.
-            _seconds.Tick += (sender, e) => dataGridView.Refresh();
+            _seconds.Tick += onSecondsTick;
             _seconds.Start();
         }
         BindingList<Record> Records { get; } =
             new BindingList<Record>();
+        private void onSecondsTick(object? sender, EventArgs e)
+        {
+            Text = $"Main Form - {DateTime.Now.ToLongTimeString()}";
+            dataGridView.Refresh();
+        }
         System.Windows.Forms.Timer _seconds = 
             new System.Windows.Forms.Timer { Interval = 1000 };
     }
@@ -64,7 +83,7 @@ namespace countdown_timers_in_dgv
     {
         WAITING,
         ACTIVE,
-        DONE,
+        EXPIRED,
         FREE,
     }
     class Record
@@ -106,7 +125,7 @@ namespace countdown_timers_in_dgv
                         }
                         else
                         {
-                            State = State.DONE;
+                            State = State.EXPIRED;
                             return "0";
                         }
                     }
