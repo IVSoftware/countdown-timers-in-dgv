@@ -19,6 +19,13 @@ namespace countdown_timers_in_dgv
             col = dataGridView.Columns[nameof(Record.OutputTime)];
             col.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
             col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dataGridView.CellPainting += (sender, e) =>
+            {
+                if((e.ColumnIndex.Equals(dataGridView.Columns["State"]) && (e.RowIndex != -1)))
+                {
+
+                }
+            };
             Records.Clear();
             #endregion F O R M A T    C O L U M N S
 
@@ -42,8 +49,16 @@ namespace countdown_timers_in_dgv
             //    InputTime = now - TimeSpan.FromDays(1),
             //    OutputTime = (now - TimeSpan.FromDays(1)) + TimeSpan.FromMinutes(10),
             //});
+
+            // Because we're using System.Windows.Forms.Timer the
+            // ticks are issued on the UI thread. Invoke not required.
+            _seconds.Tick += (sender, e) => dataGridView.Refresh();
+            _seconds.Start();
         }
-        BindingList<Record> Records = new BindingList<Record>();
+        BindingList<Record> Records { get; } =
+            new BindingList<Record>();
+        System.Windows.Forms.Timer _seconds = 
+            new System.Windows.Forms.Timer { Interval = 1000 };
     }
     enum State
     {
@@ -80,7 +95,7 @@ namespace countdown_timers_in_dgv
                     if((InputTime <= now) && (now <= OutputTime))
                     {
                         State = State.ACTIVE;
-                        return (OutputTime - now)?.ToString(@"hh\:mm")!;
+                        return (OutputTime - now)?.ToString(@"hh\:mm\:ss")!;
                     }
                     else
                     {
