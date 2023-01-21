@@ -1,16 +1,19 @@
-Your question is about countdown timers, specifically **How can I put different countdown timers in different cells?**
+Your question is about countdown timers, specifically:
+>**How can I put different countdown timers in different cells?**
 
 If you think about it, for any given row in your `DataGridView`, that information can be calculated by knowing these three things:
 - What is the input time?
 - What is the output time?
-- _What time is is NOW?_
+- _What time is is **NOW**!?_
 
-In an open ended way, you have asked for "help with this problem" so I will offer you one possible solution.
+In an open ended way, you have asked for "help with this problem" so I will offer you one possible solution because I believe that using the `DataSource` property of `DataGridView` will help you simplify all of your interactions with this powerful UI control.  
+
+[![screenshot][1]][1]
 
 ***
-**Record class to represent a row**
+**Record `class` represents a Row**
 
-Consider making a class that is a "model". Add public properties for values you wish to be shown in your `DataGridView`. To achieve a result similar to what you have shown in your post, you'll also want to make it a "smart" class than can update itself based on the current time.
+Consider making a class that is a "model" for a row. Add public properties for values you wish to be shown in your `DataGridView`. Obtaining a result similar to what you have shown in your post is simplified by giving it the ability to update _itself_ based on the current time.
 
     enum State
     {
@@ -68,21 +71,23 @@ Consider making a class that is a "model". Add public properties for values you 
         public State State { get; private set; }
     }
 
-    ***
-    **Data Binding**
+***
+**Data Binding**
 
-    Using the `Record` class, assign the `dataGridView.DataSource` to a `BindingList<Record>()`. Now, instead of having to work with the UI control directly you can add or remove records by manipulating the Records list.
+Using the `Record` class, assign the `dataGridView.DataSource` to a `BindingList<Record>()`. Now, instead of having to work with the UI control directly you can add or remove records by manipulating the Records list.
 
-    ***
-    **Updates**
+***
+**Updates**
 
-    Whenever `Refresh` is called on the `DataGridView` the individual records will refresh their calculations. The method that loads the form does the following:
+Whenever `Refresh` is called on the `DataGridView` the individual records will refresh their calculations. The method that loads the form does the following:
 
-    - Auto-generate columns for the DGV.
-    - Add four items for testing purposes.
-    - Attach a timer event to update the DGV and the main form title bar.
+- Auto-generate columns for the DGV.
+- Add four items for testing purposes.
+- Attach a timer event to update the DGV and the main form title bar.
 
-        public partial class MainForm : Form
+One you do this, the view will globally refresh one time per second, giving you a behavior similar to what you have described.
+
+    public partial class MainForm : Form
     {
         public MainForm() => InitializeComponent();
         protected override void OnLoad(EventArgs e)
@@ -159,3 +164,6 @@ Consider making a class that is a "model". Add public properties for values you 
         System.Windows.Forms.Timer _seconds = 
             new System.Windows.Forms.Timer { Interval = 1000 };
     }
+
+
+  [1]: https://i.stack.imgur.com/stuCx.png
