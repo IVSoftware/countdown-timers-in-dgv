@@ -9,6 +9,7 @@ namespace countdown_timers_in_dgv
         {
             base.OnLoad(e);
             dataGridView.DataSource = Records;
+
             #region F O R M A T    C O L U M N S
             Records.Add(new Record()); // <- Auto-generate columns
             dataGridView.Columns[nameof(Record.IdCode)].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
@@ -19,36 +20,34 @@ namespace countdown_timers_in_dgv
             col = dataGridView.Columns[nameof(Record.OutputTime)];
             col.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
             col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            dataGridView.CellPainting += (sender, e) =>
-            {
-                if(e.ColumnIndex.Equals(dataGridView.Columns["State"].Index) && (e.RowIndex != -1))
-                {
-                    switch (Records[e.RowIndex].State)
-                    {
-                        case State.WAITING: e.CellStyle.BackColor = Color.LightBlue; break;
-                        case State.ACTIVE: e.CellStyle.BackColor = Color.LightYellow; break;
-                        case State.EXPIRED: e.CellStyle.BackColor = Color.LightGray; break;
-                        case State.FREE: e.CellStyle.BackColor = Color.LightGreen; break;
-                    }
-                }
-            };
+            dataGridView.CellPainting += onDgvCellPainting;
             Records.Clear();
             #endregion F O R M A T    C O L U M N S
 
-            #region A D D    T E S T    R E C O R D S
+            addTestRecords();
+
+            // Because we're using System.Windows.Forms.Timer the
+            // ticks are issued on the UI thread. Invoke not required.
+            _seconds.Tick += onSecondsTick;
+            _seconds.Start();
+        }
+
+        // Simulated records for minimal sample.
+        private void addTestRecords()
+        {
             var now = DateTime.Now;
             // For testing, round to whole minutes;
             now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-            
-            Records.Add(new Record 
-            { 
-                IdCode = "fix0001", 
+
+            Records.Add(new Record
+            {
+                IdCode = "fix0001",
                 InputTime = now - TimeSpan.FromHours(1),
                 OutputTime = now - TimeSpan.FromHours(1) + TimeSpan.FromMinutes(10),
             });
-            Records.Add(new Record 
-            { 
-                IdCode = "fix0002", 
+            Records.Add(new Record
+            {
+                IdCode = "fix0002",
                 InputTime = now,
                 OutputTime = now + TimeSpan.FromMinutes(10),
             });
@@ -59,16 +58,25 @@ namespace countdown_timers_in_dgv
             Records.Add(new Record
             {
                 IdCode = "fix0004",
-                InputTime =  now + TimeSpan.FromMinutes(5),
+                InputTime = now + TimeSpan.FromMinutes(5),
                 OutputTime = now + TimeSpan.FromMinutes(5) + TimeSpan.FromMinutes(10),
             });
-            #endregion A D D    T E S T    R E C O R D S
-
-            // Because we're using System.Windows.Forms.Timer the
-            // ticks are issued on the UI thread. Invoke not required.
-            _seconds.Tick += onSecondsTick;
-            _seconds.Start();
         }
+
+        private void onDgvCellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.ColumnIndex.Equals(dataGridView.Columns["State"].Index) && (e.RowIndex != -1))
+            {
+                switch (Records[e.RowIndex].State)
+                {
+                    case State.WAITING: e.CellStyle.BackColor = Color.LightBlue; break;
+                    case State.ACTIVE: e.CellStyle.BackColor = Color.LightYellow; break;
+                    case State.EXPIRED: e.CellStyle.BackColor = Color.LightGray; break;
+                    case State.FREE: e.CellStyle.BackColor = Color.LightGreen; break;
+                }
+            }
+        }
+
         BindingList<Record> Records { get; } =
             new BindingList<Record>();
         private void onSecondsTick(object? sender, EventArgs e)
